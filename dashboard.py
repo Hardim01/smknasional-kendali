@@ -1,44 +1,39 @@
 import streamlit as st
-import pandas as pd
 
-# Konfigurasi Halaman (Agar bagus di HP)
-st.set_page_config(page_title="RUAS STUDIO - Dashboard", layout="centered")
+# 1. Fungsi untuk Panel Login
+def login():
+    st.title("🔐 Login Ruas Studio")
+    st.subheader("Sistem Kendali SMK Nasional")
+    
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        submit = st.form_submit_button("Masuk")
+        
+        if submit:
+            # Bapak bisa ganti username & password di bawah ini
+            if username == "admin" and password == "smk123":
+                st.session_state["authenticated"] = True
+                st.rerun()
+            else:
+                st.error("Username atau Password salah!")
 
-# Header dengan Logo (Simulasi)
-st.title("🛡️ RUAS STUDiO")
-st.subheader("Sistem Kendali Internal Sekolah")
-st.markdown("---")
+# 2. Cek apakah user sudah login atau belum
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-# Ringkasan Angka (Widget Metric)
-col1, col2 = st.columns(2)
-with col1:
-    st.metric(label="Total Dana BOS", value="Rp 125.000.000", delta="+ 5.400.000")
-with col2:
-    st.metric(label="Pengeluaran Bulan Ini", value="Rp 12.500.000", delta="- 200.000", delta_color="inverse")
-
-st.markdown("---")
-
-# Menu Input Sederhana
-st.write("### 📝 Input Laporan Cepat")
-nama_staff = st.text_input("Nama Staff/Pelapor")
-kegiatan = st.selectbox("Jenis Kegiatan", ["Operasional", "Gaji/Honor", "Sarpras", "Lainnya"])
-jumlah = st.number_input("Jumlah Anggaran (Rp)", min_value=0)
-
-if st.button("Kirim Laporan"):
-    if nama_staff:
-        st.success(f"Laporan {kegiatan} dari {nama_staff} berhasil dikirim ke Kepala Sekolah!")
-    else:
-        st.warning("Mohon isi nama pelapor.")
-
-# Tabel Pemantauan
-st.markdown("---")
-st.write("### 📊 Status Anggaran Terkini")
-data = {
-    "Unit Kerja": ["Sarpras", "Kurikulum", "Kesiswaan", "Humas"],
-    "Terserap": ["Rp 45jt", "Rp 20jt", "Rp 15jt", "Rp 10jt"],
-    "Sisa": ["Rp 5jt", "Rp 10jt", "Rp 5jt", "Rp 5jt"]
-}
-df = pd.DataFrame(data)
-st.table(df)
-
-st.info("Aplikasi ini berjalan di Jaringan Lokal Sekolah.")
+if not st.session_state["authenticated"]:
+    login()
+else:
+    # --- HALAMAN UTAMA (Dashboard yang tadi) ---
+    st.sidebar.button("Log Out", on_click=lambda: st.session_state.update({"authenticated": False}))
+    
+    st.title("🛡️ DASHBOARD KENDALI")
+    st.success(f"Selamat Datang, Administrator")
+    
+    col1, col2 = st.columns(2)
+    col1.metric("Dana BOS", "Rp 125jt")
+    col2.metric("Pengeluaran", "Rp 12.5jt")
+    
+    st.write("### Laporan Masuk")
+    st.info("Belum ada laporan baru hari ini.")
